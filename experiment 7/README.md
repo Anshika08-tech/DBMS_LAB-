@@ -70,3 +70,85 @@ INSERT INTO Sales_Denormalized VALUES
 (103, '2026-03-03', 1, 'Alice', 'New York', 201, 'Downtown', 503, 'Keyboard', 75.00, 1);
 
 SELECT * FROM Sales_Denormalized;
+
+-- Drop child tables first, then parent tables
+DROP TABLE IF EXISTS OrderDetails;
+DROP TABLE IF EXISTS Orders;
+DROP TABLE IF EXISTS Products;
+DROP TABLE IF EXISTS Stores;
+DROP TABLE IF EXISTS Customers;
+
+CREATE TABLE Customers (
+    CustomerID INT PRIMARY KEY,
+    CustomerName VARCHAR(50) NOT NULL,
+    CustomerCity VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE Stores (
+    StoreID INT PRIMARY KEY,
+    StoreLocation VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE Products (
+    ProductID INT PRIMARY KEY,
+    ProductName VARCHAR(50) NOT NULL,
+    UnitPrice DECIMAL(10, 2) NOT NULL
+);
+
+CREATE TABLE Orders (
+    OrderID INT PRIMARY KEY,
+    OrderDate DATE NOT NULL,
+    CustomerID INT NOT NULL,
+    StoreID INT NOT NULL,
+    CONSTRAINT fk_orders_customer FOREIGN KEY (CustomerID) REFERENCES Customers(CustomerID),
+    CONSTRAINT fk_orders_store FOREIGN KEY (StoreID) REFERENCES Stores(StoreID)
+);
+
+CREATE TABLE OrderDetails (
+    OrderID INT NOT NULL,
+    ProductID INT NOT NULL,
+
+    Quantity INT NOT NULL CHECK (Quantity > 0),
+    PRIMARY KEY (OrderID, ProductID),
+    CONSTRAINT fk_details_order FOREIGN KEY (OrderID) REFERENCES Orders(OrderID) ON DELETE CASCADE,
+    CONSTRAINT fk_details_product FOREIGN KEY (ProductID) REFERENCES Products(ProductID)
+);
+
+-- Load Normalized Data from Denormalized Source
+INSERT INTO Customers 
+SELECT DISTINCT CustomerID, CustomerName, CustomerCity FROM Sales_Denormalized;
+
+INSERT INTO Stores 
+SELECT DISTINCT StoreID, StoreLocation FROM Sales_Denormalized;
+
+INSERT INTO Products 
+SELECT DISTINCT ProductID, ProductName, UnitPrice FROM Sales_Denormalized;
+
+INSERT INTO Orders 
+SELECT DISTINCT OrderID, OrderDate, CustomerID, StoreID FROM Sales_Denormalized;
+
+INSERT INTO OrderDetails 
+SELECT OrderID, ProductID, Quantity FROM Sales_Denormalized;
+
+WITH ReconstructedSales AS (
+    SELECT 
+        o.OrderID,
+        o.OrderDate,
+        c.CustomerID,
+        c.CustomerName,
+        c.CustomerCity,
+        s.StoreID,
+        s.StoreLocation,
+        p.ProductID,
+        p.ProductName,
+        p.UnitPrice,
+        od.Quantity
+    FROM Orders o
+    JOIN Customers c ON o.CustomerID = c.CustomerID
+    JOIN Stores s ON o.StoreID = s.StoreID
+    JOIN OrderDetails od ON o.OrderID = od.OrderID
+    JOIN Products p ON od.ProductID = p.ProductID
+)
+SELECT * FROM ReconstructedSales
+EXCEPT
+SELECT * FROM Sales_Denormalized;
