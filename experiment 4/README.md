@@ -50,7 +50,6 @@ FROM Employee e
 INNER JOIN Department d ON e.dept_id = d.dept_id
 ORDER BY d.dept_name, e.emp_name;
 ```
-![Query 1 Output](query1.png)
 
 ---
 
@@ -62,7 +61,6 @@ FROM Employee e
 LEFT JOIN Works_On w ON e.emp_id = w.emp_id
 WHERE w.proj_id IS NULL;
 ```
-![Query 2 Output](query2.png)
 
 ---
 
@@ -74,7 +72,6 @@ FROM Employee e
 LEFT JOIN Employee m ON e.manager_id = m.emp_id
 ORDER BY m.emp_name, e.emp_name;
 ```
-![Query 3 Output](query3.png)
 
 ---
 
@@ -88,7 +85,7 @@ JOIN Project p ON w.proj_id = p.proj_id
 WHERE w.hours > 150
 ORDER BY w.hours DESC;
 ```
-![Query 4 Output](query4.png)
+
 
 ---
 
@@ -102,7 +99,7 @@ WHERE e.salary > (SELECT AVG(e2.salary)
                   WHERE e2.dept_id = e.dept_id)
 ORDER BY e.dept_id, e.salary DESC;
 ```
-![Query 5 Output](query5.png)
+
 
 ---
 
@@ -114,7 +111,6 @@ FROM Department d
 WHERE EXISTS (SELECT 1 FROM Project p
               WHERE p.dept_id = d.dept_id AND p.budget >= 600000);
 ```
-![Query 6 Output](query6.png)
 
 ---
 
@@ -125,7 +121,7 @@ SELECT e.emp_name
 FROM Employee e
 WHERE NOT EXISTS (SELECT 1 FROM Works_On w WHERE w.emp_id = e.emp_id);
 ```
-![Query 7 Output](query7.png)
+
 
 ---
 
@@ -138,7 +134,7 @@ JOIN Works_On w ON e.emp_id = w.emp_id
 WHERE w.proj_id = 1
   AND e.emp_id IN (SELECT emp_id FROM Works_On WHERE proj_id = 2);
 ```
-![Query 8 Output](query8.png)
+
 
 ---
 
@@ -151,7 +147,6 @@ JOIN Works_On w ON e.emp_id = w.emp_id
 WHERE w.proj_id = 1
   AND e.emp_id NOT IN (SELECT emp_id FROM Works_On WHERE proj_id = 2);
 ```
-![Query 9 Output](query9.png)
 
 ---
 
@@ -165,7 +160,7 @@ FROM Employee e
 WHERE e.salary > (SELECT AVG(e2.salary) FROM Employee e2
                   WHERE e2.dept_id = e.dept_id);
 ```
-![Explain Correlated](explain1.png)
+
 
 *Derived table join execution plan (pre-aggregated table optimization):*
 ```sql
@@ -176,7 +171,6 @@ JOIN (SELECT dept_id, AVG(salary) AS avg_sal
   ON e.dept_id = a.dept_id
 WHERE e.salary > a.avg_sal;
 ```
-![Explain Derived Join](explain2.png)
 
 ---
 
@@ -185,7 +179,6 @@ WHERE e.salary > a.avg_sal;
 ```sql
 EXPLAIN SELECT * FROM Employee WHERE dept_id = 2;
 ```
-![Before Index](explain_before_idx.png)
 
 *Creating the Index:*
 ```sql
@@ -196,7 +189,6 @@ CREATE INDEX idx_emp_dept ON Employee(dept_id);
 ```sql
 EXPLAIN SELECT * FROM Employee WHERE dept_id = 2;
 ```
-![After Index](explain_after_idx.png)
 
 ---
 
