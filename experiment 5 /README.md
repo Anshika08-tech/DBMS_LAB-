@@ -50,7 +50,6 @@ GROUP BY d.dept_id, d.dept_name;
 
 SELECT * FROM dept_salary_summary;
 ```
-![Query 1 Output](dept_salary_summary.png)
 
 ---
 
@@ -65,7 +64,6 @@ LEFT JOIN Employee m ON e.manager_id = m.emp_id;
 
 SELECT * FROM employee_hierarchy ORDER BY emp_id;
 ```
-![Query 2 Output](employee_hierarchy.png)
 
 ---
 
@@ -89,7 +87,6 @@ WITH CHECK OPTION;
    SELECT emp_id, emp_name, salary FROM Employee WHERE emp_id = 111;
    UPDATE emp_it_view SET salary = 60000 WHERE emp_id = 111;
    ```
-   ![View Update Success](view_update_success.png)
 
 2. **Failed Update Violating `WITH CHECK OPTION`:**
    ```sql
@@ -105,7 +102,7 @@ WITH CHECK OPTION;
    SELECT * FROM Employee WHERE emp_id = 131;
    DELETE FROM emp_it_view WHERE emp_id = 131;
    ```
-   ![View Insert Delete](view_insert_delete.png)
+   
 
 4. **Attempting Update on Aggregated View (Non-Updatable):**
    ```sql
@@ -124,7 +121,7 @@ SELECT table_name, is_updatable
 FROM information_schema.views
 WHERE table_schema = DATABASE();
 ```
-![View Metadata](view_metadata.png)
+
 
 ---
 
@@ -146,7 +143,7 @@ SELECT emp_id, emp_name, level, chain_path
 FROM chain
 ORDER BY chain_path;
 ```
-![Recursive CTE Top Down](cte_chain.png)
+
 
 ---
 
@@ -163,7 +160,7 @@ WITH RECURSIVE up AS (
 )
 SELECT step, emp_id, emp_name FROM up;
 ```
-![Recursive CTE Bottom Up](cte_upward.png)
+
 
 ---
 
@@ -178,7 +175,7 @@ WITH RECURSIVE chain AS (
 )
 SELECT level, COUNT(*) AS employees FROM chain GROUP BY level;
 ```
-![Recursive CTE Tier Count](cte_levels.png)
+
 
 ---
 
